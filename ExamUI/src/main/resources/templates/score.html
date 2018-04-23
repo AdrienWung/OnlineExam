@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Your score</title>
+</head>
+<body>
+<p th:text="|考试ID ${scoreBean.examID}|">1</p>
+<p th:text="|邮箱 ${scoreBean.email}|">123@126.com</p>
+<p th:text="|课程 ${scoreBean.course}|">java</p>
+<p th:text="|你的得分 ${scoreBean.score}|">90</p>
+<ul>
+    <li th:each="question : ${scoreBean.questions}">
+        <p th:text="${question.description}"></p>
+        <p th:text="${question.selections}"></p>
+        <p th:text="|正确答案 ${question.answer}|"></p>
+        <p th:text="|你的答案 ${question.personalAnswer}|"></p>
+    </li>
+</ul>
+</body>
+</html>

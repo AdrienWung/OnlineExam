@@ -1,0 +1,337 @@
+﻿------------------------------------------------------------------------------------------------
+OnlineTest System:
+//老师新生成考试
+1./onlineexam/create
+-post 
+{
+	"creator":"234@163.com",
+	"questionNum":"20",
+	"questionScore":"5",
+	"startTime":"2017-11-11 13:00:00",
+	"endTime":"2017-11-11 14:00:00",
+	"examName":"***",
+	"course":"JAVA",
+	"groupBy":"class",
+	"participants":[
+		{"email":"123@163.com"},
+		{"email":"456@163.com"}
+	]
+}
+
+response
+{
+	status:"success",
+	examID:"4905",
+	password:""
+}
+
+//查看某一考试基本信息（无试题）
+2./onlineexam/exam/{examID}
+-get
+response base info about test ,no questions
+{
+	status:"success",
+	examName:"***",
+	course:"JAVA",
+	questionNum:20,
+	questionScore:5,
+	startTime:"2017-11-11 13:00:00",
+	endTime:"2017-11-11 14:00:00",
+	participants:[
+		{email:"123@163.com"},
+		{email:"456@163.com"}
+	]
+}
+
+//考生开始考试
+3./onlineexam/start
+-post 
+start test
+{
+	examID:"",
+	email:"",
+	password:""
+}
+
+response
+{
+	status:"success",
+	startTime:"2017-11-11 13:00:00",
+	endTime:"2017-11-11 14:00:00",
+	single:[
+		{
+			questionID:"",
+			category:"",
+			description:"",
+			selections:"",
+			score:1
+		},...
+	],
+	multiple:[
+		{
+			questionID:"",
+			category:"",
+			description:"",
+			selections:"",
+			score:1
+		},...
+	]
+}
+
+
+//考生开始考试
+4./onlineexam/loadStudentList
+-post 
+pass list(a binary txt file)
+每一行是考生的信息
+headers:{Content-Type:multipart/form-data}
+
+response
+{
+	status:"success",
+	participants:[
+		{email:"123@163.com"},
+		{email:"456@163.com"}
+	]	
+}
+返回保存的路径
+------------------
+5./onlineexam/query
+{ "email":"123@qq.com"}
+[
+{"examID":123,
+ "examName":"1234"}
+]
+------------------------------------------------------------------------------
+Exam Data Center:
+//查看某一试题全部信息
+1./rest/question/{questionID}
+-get
+{
+	questionID:"",
+	course:"JAVA",
+	category:"",
+	description:""
+	selections:"",
+	answer:""
+}
+
+//请求选取随机试题
+2./rest/question/random
+-post
+{
+	course:””,
+	count:""
+}
+response
+[
+	{
+		questionID:"",
+		course:"JAVA",
+		category:"single",
+		description:""
+		selections:""
+	},...
+]
+
+//模板下载
+3./rest/template/download
+download excel template
+{
+    "status": "success",
+    "path": "/template.xslx"
+}
+
+//试题上传
+4./rest/template/upload/{course}
+upload excel template
+
+Post a binary xlsx file. headers:{Content-Type:multipart/form-data}
+
+file:"xsasa.xslx"
+
+response
+{
+	"status": "success",
+}
+
+
+------------------------------------------------------------------------------------------------
+Scoring System:
+//进行评分
+1./scoring
+{
+	email:"123@163.com",
+	examID:"",
+	questions:[
+		{
+			questionID:"",
+			personalAnswer:""
+		},...
+	]
+}
+
+response:
+{
+	email:"123@163.com",
+	examID:"",
+	course:"JAVA",
+	score:85,
+	questionScore:5,
+	questions:[
+		{
+			questionID:"",
+			description:"",
+			selections:"",
+			category: "single",
+			answer:"",
+			personalAnswer:""
+		},...
+	]
+}
+
+//历史成绩查看
+2./scoring/history
+{
+	email:"123@163.com",
+	examID:""
+}
+response:
+{
+	email:"123@163.com",
+	examID:"",
+	course:"JAVA",
+	score:85,
+	questionScore:5,
+	questions:[
+		{
+			questionID:"",
+			description:"",
+			selections:"",
+			category: "single",
+			answer:"",
+			personalAnswer:""
+		},...
+	]
+}
+
+
+//考试状态查询
+3./scoring/exam/state
+{
+	email:"123@163.com",
+	examID:""
+}
+response:
+{
+	email:"123@163.com",
+	examID:"",
+	state:"" //inExam, overdue, finished, waiting
+}
+
+4./scoring/exam/scoreState
+{
+	"email":"123@163.com",
+	"examID":""
+}
+response:
+{
+	"email":"123@163.com",
+	"score":"100",
+	"state":""//inExam, overdue, finished, waiting
+}	
+
+------------------------------------------------------------------------------------------------
+Info Center:
+1./register/student
+{
+	email:"123@163.com",
+	name:"王嘉琛",
+	password:"123456",
+	className:"3",
+	gradeName:"大四",
+	verCode:"633654"
+}
+response:
+{
+	status:"success",
+	msg:"注册成功！"
+}
+2./register/teacher
+{
+	email:"123@163.com",
+	name:"孙康",
+	password:"123456",
+	verCode:"633654"
+}
+response:
+{
+	status:"success"
+	msg:"注册成功！"
+}
+3./register/sendVerCode
+{
+	email:"123@163.com"
+}
+response:
+{
+	status:"success",
+	msg:"发送成功"
+}
+4./login
+{
+	email:"123@163.com",
+	password:"123456"
+}
+response:
+{
+	status:"success",
+	identity:"teacher",
+	msg:"登录成功！",
+	exams:[
+		{
+			examID:123
+			examName:"Java"
+			status:"inExam"
+		},...
+	]
+	courses:[			//老师才有的字段
+		{
+			
+			courseName:"Java"
+		},...
+	]			
+}//再给他个cookie，学生还是老师，账号信息
+5./newCourse
+{
+	email:"123@163.com",
+	course:"数学",
+}
+response:
+{
+	status:"success",
+	msg:"添加成功！"
+}
+6./sendEmail
+{
+	email:"123@163.com",
+	title:"考试密码",
+	content:"12478"
+}
+response:
+{
+	status:"success",
+	msg:"发送成功！"
+}
+
+----------------------------------------DATA MODEL-----------------------------------------------
+//试题的全部属性
+{
+	questionID:"45",
+	course:"JAVA",
+	category:"single/multiple",
+	description:"What is the right answer of '1 + 1'?",
+	selections:"%A%0;%B%1;%C%2;%D%3;",
+	answer:"C",
+	personalAnswer:"B"
+}

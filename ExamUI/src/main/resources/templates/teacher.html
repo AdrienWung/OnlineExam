@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>teacher</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous"/>
+    <script src="../static/jQuery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="jQuery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/moment.js/2.18.1/moment-with-locales.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css"
+          rel="stylesheet"/>
+    <script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+    <script th:inline="javascript">
+        var emails = new Array();
+        /*<![CDATA[*/
+
+        var accountEmail = /*[[${accoutEmail}]]*/ '';
+        var templatePath = /*[[${templatePath}]]*/ '';
+        /*]]>*/
+
+        $(function () {
+            var picker1 = $('#datetimepicker1').datetimepicker({
+                format: 'YYYY-MM-DD HH:mm:ss',
+                locale: moment.locale('zh-cn'),
+                //minDate: '2016-7-1'
+            });
+            var picker2 = $('#datetimepicker2').datetimepicker({
+                format: 'YYYY-MM-DD HH:mm:ss',
+                locale: moment.locale('zh-cn'),
+            });
+            //动态设置最小值
+            picker1.on('dp.change', function (e) {
+                picker2.data('DateTimePicker').minDate(e.date);
+            });
+            //动态设置最大值
+            picker2.on('dp.change', function (e) {
+                picker1.data('DateTimePicker').maxDate(e.date);
+            });
+            $('#download').append('<a href="' + templatePath + ' " download="试题模板.xlsx">下载试题模板</a>');
+        });
+
+        function uploadQuestions() {
+            var courseName = $('#select option:selected').text();
+            var formData = new FormData();
+            formData.append('file', $('#file')[0].files[0]);
+            $.ajax({
+                type: 'POST',
+                cache: false,
+                data: formData,
+                processData: false,
+                contentType: false,
+                url: 'uploadQuestions/'+courseName,
+                success: function (result) {
+                    if(result=="success"){
+                        alert("上传成功");
+                    }else{
+                        alert("上传失败");
+                    }
+                    console.log(result);
+                }
+            });
+
+        }
+
+        function generateExam() {
+            var startTime = $("#datetimepicker1").find("input").val();
+            var endTime = $("#datetimepicker2").find("input").val();
+            var courseName = $('#select option:selected').text();
+            var questionNum = $("#questionNum").val();
+            var questionScore = $("#questionScore").val();
+            var examName = $("#examName").val();
+            $.ajax({
+                type: 'POST',
+                url: "createExam",
+                data: {
+                    "questionNum": questionNum,
+                    "questionScore": questionScore,
+                    "startTime": startTime,
+                    "endTime": endTime,
+                    "examName": examName,
+                    "course": courseName,
+                    "groupBy": "class",
+                    "emails": emails.join(',')
+                },
+                success: function (msg) {
+                    alert(msg);
+                },
+                error: function (errorThrown) {
+                    alert(errorThrown);
+                },
+                dataType: 'text'
+            });
+        }
+
+//        function addEmail() {
+//            var email = $('#email').val();
+//            $('#emailList').append('<li class="list-group-item">' + email + "</li>");
+//            emails.push(email);
+//        }
+
+        function importEmails() {
+            var formData = new FormData();
+            formData.append('file', $('#studentFile')[0].files[0]);
+            $.ajax({
+                type: 'POST',
+                cache: false,
+                data: formData,
+                processData: false,
+                contentType: false,
+                url: 'uploadStudents',
+                success: function (data) {
+                    console.log(data);
+                    $('#students').empty();
+                    emails=new Array();
+                    for (var i in data) {
+                        $('#students').append('<li class="list-group-item">' + data[i] + "</li>");
+                        emails.push(data[i]);
+                    }
+                }
+            });
+        }
+
+        function addCourse() {
+            var courseName = $('#course').val();
+            $.ajax({
+                type: 'POST',
+                url: "addCourse",
+                data: {
+                    "course": courseName,
+                    "email": accountEmail
+                },
+                success: function () {
+                    alert("增加成功");
+                },
+                error: function (errorThrown) {
+                    alert(errorThrown);
+                },
+                dataType: 'text'
+            });
+
+        }
+    </script>
+</head>
+<body>
+
+<!--<div class="row">-->
+    <!--<div class="col-lg-6 col-lg-offset-3">-->
+        <!--<div class="input-group">-->
+            <!--<input type="text" class="form-control" placeholder="考生email" id="email"/>-->
+            <!--<span class="input-group-btn">-->
+        <!--<button class="btn btn-default" type="button" onclick="addEmail()">增加考生</button>-->
+      <!--</span>-->
+        <!--</div>&lt;!&ndash; /input-group &ndash;&gt;-->
+    <!--</div>&lt;!&ndash; /.col-lg-6 &ndash;&gt;-->
+    <!--<div class="col-lg-3">-->
+        <!--<div>-->
+
+        <!--</div>-->
+    <!--</div>&lt;!&ndash; /.col-lg-6 &ndash;&gt;-->
+<!--</div>-->
+<!--<ul class="list-group col-lg-6 col-lg-offset-3" id="emailList">-->
+<!--</ul>-->
+<div class="panel panel-default col-md-6 ">
+    <!-- Default panel contents -->
+    <div class="panel-heading">考试信息</div>
+
+    <table class="table">
+        <tr>
+            <td width="20%">
+                <h4>考试课程</h4>
+            </td>
+            <td width="80%">
+                <select class="form-control" id="select">
+                    <option th:each="course:${courses}" th:text="${course.courseName}"></option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td width="20%">
+                <h4>考试名称</h4>
+            </td>
+            <td width="80%">
+                <input type="text" class="form-control" id="examName" aria-label="..."/>
+            </td>
+        </tr>
+        <tr>
+            <td width="20%">
+                <h4>试题数</h4>
+            </td>
+            <td width="80%">
+                <input type="text" class="form-control" id="questionNum" aria-label="..."/>
+            </td>
+        </tr>
+        <tr>
+            <td width="20%">
+                <h4>试题分值</h4>
+            </td>
+            <td width="80%">
+                <input type="text" class="form-control" id="questionScore" aria-label="..."/>
+            </td>
+        </tr>
+        <tr>
+            <td width="20%">
+                <h4>选择开始时间</h4>
+            </td>
+            <td width="80%">
+                <div class='input-group date' id='datetimepicker1'>
+                    <input type='text' class="form-control"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h4>选择结束时间</h4>
+            </td>
+            <td>
+                <div class='input-group date' id='datetimepicker2'>
+                    <input type='text' class="form-control"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="20%">
+                <h4 >试题</h4>
+            </td>
+            <td width="80%" id="download">
+                <form id="uploadForm">
+                    <input id="file" type="file" name="file"/>
+                    <button id="upload" type="button"  onclick="uploadQuestions()">上传试题</button>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td width="20%">
+                <h4>考生名单</h4>
+            </td>
+            <td width="80%">
+                <form id="uploadStudent">
+                    <input id="studentFile" type="file" name="file"/>
+                    <button id="uploadButton" type="button"  onclick="importEmails()">上传考生名单</button>
+                </form>
+                <a href="testDownload"  download="学生名单.txt">下载学生名单模板</a>
+            </td>
+        </tr>
+
+    </table>
+    <table class="table">
+        <tr>
+            <td width="40%">
+            </td>
+            <td width="60%">
+                <input class="btn btn-default" type="button" value="生成考试" onclick="generateExam()"/>
+            </td>
+        </tr>
+    </table>
+
+
+
+</div>
+
+<div class="panel panel-default col-md-6 ">
+    <!-- Default panel contents -->
+    <div class="panel-heading">其他功能</div>
+    <table class="table">
+        <tr>
+            <td width="80%">
+                <input type="text" class="form-control" placeholder="课程名" id="course"/>
+            </td>
+            <td width="20%">
+                <button class="btn btn-default" type="button" onclick="addCourse()">增加课程</button>
+            </td>
+        </tr>
+        <tr>
+            <form action="showExam" method="post">
+            <td width="80%">
+                <select name="examID" class="form-control" id="selectExam">
+                    <option th:each="exam:${exams}" th:text="${exam.examName}" th:value="${exam.examID}"></option>
+                </select>
+            </td>
+            <td width="20%">
+                <button class="btn btn-default" type="submit" >查看考试</button>
+            </td>
+            </form>
+        </tr>
+    </table>
+
+</div>
+<div class="panel panel-default col-md-6 ">
+    <!-- Default panel contents -->
+    <div class="panel-heading">考生名单</div>
+    <ul class="list-group" id="students">
+    </ul>
+
+</div>
+</body>
+</html>

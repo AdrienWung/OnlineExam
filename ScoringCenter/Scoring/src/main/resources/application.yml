@@ -1,0 +1,30 @@
+server:
+  port: 8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://114.115.136.238:8801/eureka/
+
+spring:
+  datasource.primary:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/scoring_data?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+    username: root
+    password: root
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    filters: stat,wall,log4j
+  application:
+    name: SCORING
+
+logging:
+  file: springboot.log
+  level:
+    org:
+      mybatis: TRACE
+      springframework: INFO
+    online:
+      zhaopei:
+        mypoject: TRACE

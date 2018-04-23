@@ -1,0 +1,34 @@
+server:
+  port: 8085
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://114.115.136.238:8801/eureka/
+      
+      
+spring:
+  datasource.primary:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/OnlineTest?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+    username: root
+    password: root
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    filters: stat,log4j
+  application:
+    name: ONLINETEST
+
+
+logging:
+  file: springboot.log
+  level:
+    org:
+      mybatis: TRACE
+      springframework: INFO
+    online:
+      zhaopei:
+        mypoject: TRACE
+        
+        
